@@ -37,6 +37,12 @@ dbh = MySQLdb.connect(host = config.get("database", "host"),
 	db = config.get("database", "database")
 )
 
+# Wordpress allows table prefixes.
+if config.get("database", "tableprefix"):
+	table = config.get("database", "tableprefix") + "_posts"
+else:
+	table = "posts"
+
 def printblankline():
 	printitem("i", "")
 
@@ -77,7 +83,7 @@ def index(limit = None):
 	global dbh
 	
 	c = dbh.cursor()
-	c.execute("SELECT post_name, post_date, post_title FROM posts WHERE post_type = %s AND post_status = %s ORDER BY post_date DESC", ("post", "publish"))
+	c.execute("SELECT post_name, post_date, post_title FROM " + table + " WHERE post_type = %s AND post_status = %s ORDER BY post_date DESC", ("post", "publish"))
 	if limit:
 		rows = c.fetchmany(limit)
 	else:
@@ -112,7 +118,7 @@ def search(term):
 	searchterm = "[[:<:]]" + term + r"[[:>:]]"
 
 	c = dbh.cursor()
-	c.execute("SELECT post_name, post_date, post_title FROM posts WHERE post_type = %s AND post_status = %s AND (post_title RLIKE %s OR post_content RLIKE %s) ORDER BY post_date DESC", ("post", "publish", searchterm, searchterm))
+	c.execute("SELECT post_name, post_date, post_title FROM " + table + " WHERE post_type = %s AND post_status = %s AND (post_title RLIKE %s OR post_content RLIKE %s) ORDER BY post_date DESC", ("post", "publish", searchterm, searchterm))
 	rows = c.fetchall()
 
 	printtitle("Search Results :: %s" % term)
@@ -145,7 +151,7 @@ def post(name):
 		return search(term)
 
 	c = dbh.cursor()
-	c.execute("SELECT post_title, post_content FROM posts WHERE post_type = %s AND post_status = %s AND post_name = %s", ("post", "publish", name))
+	c.execute("SELECT post_title, post_content FROM " + table + " WHERE post_type = %s AND post_status = %s AND post_name = %s", ("post", "publish", name))
 	row = c.fetchone()
 
 	charset = config.get("blog", "charset")

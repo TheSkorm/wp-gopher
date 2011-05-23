@@ -3,6 +3,7 @@ database = wordpress
 host = localhost
 password = password
 user = username
+tableprefix =
 
 [blog]
 charset = UTF-8
